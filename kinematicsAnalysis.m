@@ -10,7 +10,7 @@ info = jsondecode(fileread(fullfile(folderPath, '2021-02-25_1_e53_hardwareInfo.j
 % directory = '/Users/minhnhatle/Dropbox (MIT)/Nhat/Rigbox/examplesubject-050621/4';
 % good session:
 directory = '/Users/minhnhatle/Dropbox (MIT)/Nhat/Rigbox/e43/2020-11-05/1';
-directory = '/Users/minhnhatle/Dropbox (MIT)/Nhat/Rigbox/e57/2021-05-11/1';
+% directory = '/Users/minhnhatle/Dropbox (MIT)/Nhat/Rigbox/f04/2021-05-12/2';
 
 bfile = dir(fullfile(directory, '*Block.mat'));
 load(fullfile(bfile(1).folder, bfile(1).name), 'block');
@@ -111,8 +111,8 @@ tpoints = linspace(window(1), window(2), numel(traceL));
 % Set average pre-movement position to zero
 premovL = allTracesL(:, tpoints < 0 & tpoints > -1);
 premovR = allTracesR(:, tpoints < 0 & tpoints > -1);
-meanpremovL = mean(premovL, 2);
-meanpremovR = mean(premovR, 2);
+meanpremovL = nanmean(premovL, 2);
+meanpremovR = nanmean(premovR, 2);
 
 allTracesL = allTracesL - meanpremovL;
 allTracesR = allTracesR - meanpremovR;
@@ -187,11 +187,11 @@ set(gca, 'FontSize', 16);
 
 
 %% Histogram of distributions at 0.5s
-posLdist = allTracesL(:, abs(tpoints - 0.5) < 0.0005);
-posRdist = allTracesR(:, abs(tpoints - 0.5) < 0.0005);
-histogram(posLdist)
+posLdist = allTracesL(:, abs(tpoints - 0.4) < 0.0005);
+posRdist = allTracesR(:, abs(tpoints - 0.4) < 0.0005);
+histogram(posLdist, -40:5:40)
 hold on
-histogram(posRdist)
+histogram(posRdist, -40:5:40)
 
 
 
