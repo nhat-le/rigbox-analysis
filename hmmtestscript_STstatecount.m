@@ -1,4 +1,4 @@
-animal = 'e50';
+animal = 'f01';
 states = [2,3];
 num_states = numel(states);
 
