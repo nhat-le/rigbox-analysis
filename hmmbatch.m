@@ -10,7 +10,20 @@ maxdelays = [];
 statuses = [];
 foldernames = {};
 
-%%
+%% Initial guesses for 2states and 3 states HMM
+Tinit2 = [0.95 0.05; 0.05 0.95];
+Einit2 = [0.9 0.1; 0.1 0.9];
+
+
+Tinit3 = [0.9 0.05 0.05; 0.05 0.9 0.05; 0.05 0.05 0.9];
+Einit3 = [0.9 0.1; 0.5 0.5; 0.1 0.9];
+
+%% Fit 2-state HMM
+
+logllh2states = [];
+AIClst = [];
+BIClst = [];
+k = 4; % number of estimated parameters
 
 for id = 1:numel(folders)
     [allchoices, alltargets, skipping] = get_choice_sequence(id, root, folders);
@@ -30,13 +43,12 @@ for id = 1:numel(folders)
     data(mask) = (rand(sum(mask), 1) > 0.5) + 1;
 %     data(data ~= 1 & data ~= 2) = [];
     % Fit HMM
-    Tinit = [0.95 0.05; 0.05 0.95];
-    Einit = [0.9 0.1; 0.1 0.9];
+
 
     status = 1;
     maxiter = 100;
     while (status && (maxiter < 20000))
-        [Test, Eest, status] = hmmtrainRobust(data, Tinit, Einit, maxiter);
+        [Test, Eest, status] = hmmtrainRobust(data, Tinit2, Einit2, maxiter);
         if status
             maxiter = maxiter * 2;
             fprintf('Not converged, increasing maxiter = %d..\n', maxiter); 
@@ -46,13 +58,15 @@ for id = 1:numel(folders)
     
     if status
         warning(s);
-        [Test, Eest] = hmmtrain(data, Tinit, Einit, 'Maxiterations', maxiter);
+        [Test, Eest] = hmmtrain(data, Tinit2, Einit2, 'Maxiterations', maxiter);
         s = warning('error', 'stats:hmmtrain:NoConvergence');
     end
     
-    PSTATES = hmmdecode(data,Test,Eest);
+    [PSTATES, logllh] = hmmdecode(data,Test,Eest);
 
-    
+    logllh2states(end+1) = logllh;
+    AIClst(end+1) = -2 * logllh + 2 * k;
+    BIClst(end+1) = -2 * logllh + k * log(numel(PSTATES)); 
     Tcollection{end+1} = Test;
     Ecollection{end+1} = Eest;
     
@@ -118,9 +132,9 @@ legend([l3, l4], {'P_{left}', 'P_{right}'});
 set(gca, 'FontSize', 16);
 
 %%
-filename = sprintf('HMMfits/HMMfits_%s.mat', animal);
-save(filename, 'animal', 'Tcollection', 'Ecollection', 'maxdelays', ...
-    'Pcollection', 'statuses', 'foldernames');
+% filename = sprintf('HMMfits/HMMfits_%s.mat', animal);
+% save(filename, 'animal', 'Tcollection', 'Ecollection', 'maxdelays', ...
+%     'Pcollection', 'statuses', 'foldernames');
 
 
 
