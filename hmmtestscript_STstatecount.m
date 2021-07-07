@@ -4,7 +4,7 @@ num_states = numel(states);
 
 [~,computername] = system('hostname');
 switch computername(1:end-1)
-    case 'LMNMacbook.local'
+    case {'LMNMacbook.local', 'dhcp-10-29-99-156.dyn.MIT.EDU'}
         root = fullfile('/Users/minhnhatle/Dropbox (MIT)/Nhat/Rigbox', animal);
     case 'LAPTOP-HGDQ2Q9'
         root = fullfile('C:\Users\Cherry Wang\Dropbox (MIT)\Nhat\Rigbox', animal);
@@ -19,6 +19,8 @@ states_lst = [];
 logllh_lst = [];
 normlogllh_lst = [];
 maxdelays = [];
+aic_lst = [];
+bic_lst = [];
 
 
 %% Going through each day of training for the animal specified
@@ -69,13 +71,19 @@ for id = 1:numel(folders)
     currstates = zeros(num_states, 1);
     currlogllh = zeros(num_states, 1);
     currnormlogllh = zeros(num_states, 1);
+    curr_aic = zeros(num_states, 1);
+    curr_bic = zeros(num_states, 1);
+    N = numel(allchoices);
+    
     for i = 1:num_states
         if states(i) == 2
             TRANS_GUESS = [0.95 0.05; 0.05 0.95];
             EMIS_GUESS = [0.9 0.1; 0.1 0.9];
+            k = 4; %number of states
         elseif states(i) == 3
             TRANS_GUESS = [0.9 0.08 0.02; 0.05 0.9 0.05; 0.02 0.08 0.9];
             EMIS_GUESS = [0.9 0.1; 0.5, 0.5; 0.1 0.9];
+            k = 9; 
         end
         
         status = 1;
@@ -102,21 +110,17 @@ for id = 1:numel(folders)
         currstates(i) = numel(single_states);
         
         
-        % Visualize single session
-
-%         l = subplot(2,1,i);
-%         axeslst = [axeslst l];
-%         plot(allchoices, 'o')
-%         hold on
-%         plot((PSTATES' + 1))
-%         vline(switches, 'k--')
-%         ylim([-1 3])
-%         title(['F01-' month day '21-' session ' (' num2str(i+1) ' states)'])
-
+        % AIC/BIC measures
+        curr_aic(i) = 2 * k - 2 * logllh;
+        curr_bic(i) = k * log(N) - 2* logllh; 
+        
+        
     end
     states_lst = [states_lst currstates];
     logllh_lst = [logllh_lst currlogllh];
     normlogllh_lst = [normlogllh_lst currnormlogllh];
+    aic_lst = [aic_lst curr_aic];
+    bic_lst = [bic_lst curr_bic];
     
     if skipping
         continue
