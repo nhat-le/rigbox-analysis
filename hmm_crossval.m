@@ -1,4 +1,4 @@
-animals = {'e50'}; %, 'e54', 'e57', 'f01', 'f02', 'f03', 'f04'};
+animals = {'e50', 'e54', 'e57', 'f01', 'f02', 'f03', 'f04'};
 states = [2,3];
 num_states = numel(states);
 
@@ -17,7 +17,7 @@ switch computername(1:end-1)
         savefolder = '/Users/minhnhatle/Dropbox (MIT)/Nhat/Rigbox/HMM';
 end
 
-for a = animals
+for a = animals(2:end)
     animal = a{1};
     root = fullfile(rigbox, animal);
     folders = dir(fullfile(root, '202*'));
@@ -55,7 +55,20 @@ for a = animals
         allchoices(allchoices == 0) = randsample([-1, 1],1);
         allchoices = (allchoices + 1) / 2 + 1;
         switches = find(diff(alltargets) ~= 0);
-
+        
+        
+        % Split into train and test sets
+        if rand > 0.5
+            idx = 1;
+        else
+            idx = 2;
+        end
+        
+        trainset = allchoices(idx:2:end);
+        testset = allchoices(3-idx:2:end);
+        
+        
+        
         % Fit HMM
         axeslst = [];
         currstates = zeros(num_states, 1);
@@ -75,22 +88,29 @@ for a = animals
             status = 1;
             maxiter = 100;
             while (status && (maxiter < 40000))
-                [TRANS_EST2, EMIS_EST2, status] = hmmtrainRobust(allchoices, TRANS_GUESS, EMIS_GUESS, maxiter);
+                [TRANS_EST2, EMIS_EST2, status] = hmmtrainRobust(trainset, TRANS_GUESS, EMIS_GUESS, maxiter);
                 if status
                     maxiter = maxiter * 2;
                     fprintf('Not converged, increasing maxiter = %d..\n', maxiter); 
                 end
 
             end
+            
+            if status
+                fprintf('Not converged, trying with maximum value\n');
+                s = warning('warning', 'stats:hmmtrain:NoConvergence');
+                
+                [TRANS_EST2, EMIS_EST2] = hmmtrain(trainset, TRANS_GUESS, EMIS_GUESS, 'Maxiterations', maxiter);
+                s = warning('error', 'stats:hmmtrain:NoConvergence');
+            end
+
+
 
             %[TRANS_EST2, EMIS_EST2] = hmmtrain(allchoices, TRANS_GUESS, EMIS_GUESS, 'Maxiterations', 8000);
-            [PSTATES, logllh] = hmmdecode(allchoices,TRANS_EST2,EMIS_EST2);
+            [PSTATES, logllh] = hmmdecode(testset,TRANS_EST2,EMIS_EST2);
             currlogllh(i) = logllh;
             currnormlogllh(i) = logllh/numel(allchoices);
             
-            % AIC/BIC measures
-            curr_aic(i) = 2 * k - 2 * logllh;
-            curr_bic(i) = k * log(N) - 2* logllh; 
 
             % Get all the single-trial states
             [M, I] = max(PSTATES); % get all the states in the session
@@ -104,11 +124,6 @@ for a = animals
         logllh_lst = [logllh_lst currlogllh];
         normlogllh_lst = [normlogllh_lst currnormlogllh];
         
-        
-        
-        aic_lst = [aic_lst curr_aic];
-        bic_lst = [bic_lst curr_bic];
-
         if skipping
             continue
         end
@@ -160,8 +175,9 @@ for a = animals
     animalData.states = diff_states;
     animalData.logllh = diff_logllh;
     animalData.normlogllh = diff_normlogllh;
+    animalData.maxdelays = maxdelays;
     
-    fullsaveName = sprintf('animalData_%s.mat', animal);
+    fullsaveName = sprintf('animalData_%s_crossval.mat', animal);
     save(fullfile(savefolder, fullsaveName), 'animalData')
     
 end
