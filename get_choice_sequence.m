@@ -6,7 +6,7 @@ function [allchoices, alltargets, skipping] = get_choice_sequence(id, root, fold
 % fodlers: folders(id) is the folder which contains the date of interest
 
 
-disp(id)
+% disp(id)
 % For file concatenation
 files = dir(fullfile(root, ...
     folders(id).name, '*/*Block.mat'));
