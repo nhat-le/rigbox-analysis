@@ -1,5 +1,5 @@
 animal = 'f01';
-id_lst = {7,8,9,10,11,12,13,14,15,16};
+id_lst = {14};
 all_states = [2, 3];
 
 [~,computername] = system('hostname');
@@ -20,14 +20,12 @@ folders = dir(fullfile(root, '202*'));
 
 for i = id_lst
     id = i{1};
-    fprintf('-------\n Session %d \n', id);
     figure;
     disp(id)
 
     % Concatenate sessions from the same day into one session
     files = dir(fullfile(root, ...
         folders(id).name, '*/*Block.mat'));
-    disp(folders(id).name);
     allchoices = [];
     alltargets = [];
     skipping = 0;
@@ -56,8 +54,6 @@ for i = id_lst
             alltargets = [alltargets targets(1:N)];
         end
     end
-    
-    
 
     N = numel(allchoices);
 
@@ -66,7 +62,16 @@ for i = id_lst
     end
     allchoices(allchoices == 0) = randsample([-1, 1],1);
     allchoices = (allchoices + 1) / 2 + 1;
-    switches = find(diff(alltargets) ~= 0);
+    idx = (rand > 0.5) + 1;
+    testtargets = alltargets(3-idx:2:end);
+    switches = find(diff(testtargets) ~= 0);
+    
+    % Split into train and test sets 
+    
+    trainset = allchoices(idx:2:end);
+    traintargets = alltargets(idx:2:end);
+    testset = allchoices(3 - idx:2:end);
+    
 
     axeslst = [];
 
@@ -82,7 +87,7 @@ for i = id_lst
         status = 1;
         maxiter = 100;
         while (status) % && (maxiter < 40000))
-            [TRANS_EST2, EMIS_EST2, status] = hmmtrainRobust(allchoices, TRANS_GUESS, EMIS_GUESS, maxiter);
+            [TRANS_EST2, EMIS_EST2, status] = hmmtrainRobust(trainset, TRANS_GUESS, EMIS_GUESS, maxiter);
             if status
                 maxiter = maxiter * 2;
                 fprintf('Not converged, increasing maxiter = %d..\n', maxiter); 
@@ -90,9 +95,8 @@ for i = id_lst
 
         end
 
-        [PSTATES, logllh] = hmmdecode(allchoices,TRANS_EST2,EMIS_EST2);
+        [PSTATES, logllh] = hmmdecode(testset,TRANS_EST2,EMIS_EST2);
 
-        fprintf('N states = %d, likelihood = %.4f\n', all_states(i), logllh);
         % Determine the subjective switch points
         stateSegments = PSTATES(2,:) > 0.5;
         subjSwitches = find(diff(stateSegments) ~= 0);
@@ -104,7 +108,7 @@ for i = id_lst
         %% Visualize states of one session
         l = subplot(2,1,i);
         axeslst = [axeslst l];
-        plot(allchoices, 'o')
+        plot(testset, 'o')
         hold on
         plot((PSTATES' + 1))
         hold

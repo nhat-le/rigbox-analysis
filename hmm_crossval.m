@@ -1,4 +1,4 @@
-animals = {'e50', 'e54', 'e57', 'f01', 'f02', 'f03', 'f04'};
+animals = {'e54', 'e57', 'f01', 'f02', 'f03', 'f04'};
 states = [2,3];
 num_states = numel(states);
 
@@ -17,7 +17,9 @@ switch computername(1:end-1)
         savefolder = '/Users/minhnhatle/Dropbox (MIT)/Nhat/Rigbox/HMM';
 end
 
-for a = animals(2:end)
+
+%%
+for a = animals
     animal = a{1};
     root = fullfile(rigbox, animal);
     folders = dir(fullfile(root, '202*'));
@@ -28,6 +30,13 @@ for a = animals(2:end)
     
     normlogllh_lst = [];
     maxdelays = [];
+    pstates_all = cell(numel(folders), 2);
+    T_all = cell(numel(folders), 2);
+    E_all = cell(numel(folders), 2);
+    traindata_all = cell(numel(folders), 1);
+    testdata_all = cell(numel(folders), 1);
+    allchoices_all = cell(numel(folders), 1);
+    alltargets_all = cell(numel(folders), 1);
 
 
     %% Going through each day of training for the animal specified
@@ -118,11 +127,21 @@ for a = animals(2:end)
             single_states_id = state_changes(find(diff(state_changes) == 1)+1); % indices of single-trial states
             single_states = I(single_states_id); % single-trial states
             currstates(i) = numel(single_states);
+            
+            pstates_all{id, i} = PSTATES;
+            T_all{id, i} = TRANS_EST2;
+            E_all{id, i} = EMIS_EST2;
+            
+            
         end
         
         states_lst = [states_lst currstates];
         logllh_lst = [logllh_lst currlogllh];
         normlogllh_lst = [normlogllh_lst currnormlogllh];
+        traindata_all{id} = trainset;
+        testdata_all{id} = testset;
+        allchoices_all{id} = allchoices;
+        alltargets_all{id} = alltargets;
         
         if skipping
             continue
@@ -133,6 +152,13 @@ for a = animals(2:end)
         else
             maxdelays(end+1) = 0;
         end
+        
+        
+    % Save the fit data
+%     savefilename = 
+    
+    
+    
     end
     
 
@@ -170,15 +196,17 @@ for a = animals(2:end)
     sgtitle(animal);
     linkaxes([states_fig logllh_fig normlogllh_fig], 'x');
     
-    animalData = struct;
-    animalData.name = animal;
-    animalData.states = diff_states;
-    animalData.logllh = diff_logllh;
-    animalData.normlogllh = diff_normlogllh;
-    animalData.maxdelays = maxdelays;
+%     animalData = struct;
+%     animalData.name = animal;
+%     animalData.states = diff_states;
+%     animalData.logllh = diff_logllh;
+%     animalData.normlogllh = diff_normlogllh;
+%     animalData.maxdelays = maxdelays;
     
-    fullsaveName = sprintf('animalData_%s_crossval.mat', animal);
-    save(fullfile(savefolder, fullsaveName), 'animalData')
+    fullsaveName = sprintf('animalData_%s_crossval_070921.mat', animal);
+    save(fullfile(savefolder, fullsaveName), 'animal', 'folders', 'diff_states',...
+        'normlogllh_lst', 'logllh_lst', 'maxdelays', 'T_all', 'E_all', 'pstates_all',...
+        'traindata_all', 'testdata_all', 'allchoices_all', 'alltargets_all', 'logllh_lst')
     
 end
 
