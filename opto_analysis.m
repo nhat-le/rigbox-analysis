@@ -26,8 +26,8 @@ allBlocks.events.blockInit = [];
 % Going through each day of training for the animal specified
 
 f12_acc_sessions = {'2021-07-02', '2021-07-06', '2021-07-07', '2021-07-08',...
-    '2021-07-14'};
-
+    '2021-07-09', '2021-07-14'};
+no_opto_flag = [1, 0, 0, 0, 1, 0]; %these sessions are no-opto sessions
 
 for id = 1:numel(folders)
     % Only process the sessions with the relevant brain area..
@@ -65,11 +65,16 @@ for id = 1:numel(folders)
             blocks = logical(diff(trialSide) ~= 0);
             blocks = [1 blocks];
 
-            try
-                opto = block.events.optoblockValues;
-            catch
+            if no_opto_flag(strcmp(folders(id).name, f12_acc_sessions))
                 opto = zeros(N);
+            else
+                opto = block.events.optoblockValues;
             end
+%             try
+%                 opto = block.events.optoblockValues;
+%             catch
+%                 opto = zeros(N);
+%             end
             allBlocks.events.trialSideValues = [allBlocks.events.trialSideValues trialSide(1:N)];
             allBlocks.events.optoblockValues = [allBlocks.events.optoblockValues opto(1:N)];
             allBlocks.events.feedbackValues = [allBlocks.events.feedbackValues feedback(1:N)];
@@ -106,13 +111,34 @@ end
 figure;
 ax1 = subplot(211);
 plot(optoErrors(1,:), optoErrors(2,:), 'ro', 'MarkerSize', 2);
+title('Opto')
 
 ax2 = subplot(212);
 plot(nonOptoErrors(1,:), nonOptoErrors(2,:), 'ro', 'MarkerSize', 2);
+title('No opto')
 
 linkaxes([ax1 ax2], 'xy');
 
 
+%% Take the mean
+figure;
+[errorlocs1, counts1] = count_agg(optoErrors(1,:));
+[errorlocs2, counts2] = count_agg(nonOptoErrors(1,:));
+
+plot(errorlocs1, counts1 / max(optoErrors(2,:)));
+hold on
+plot(errorlocs2, counts2/ max(nonOptoErrors(2,:)))
+
+
+
+
+function [locs, counts] = count_agg(arr)
+errorsort = sort(arr);
+[locs, ia,~] = unique(errorsort);
+ia(end + 1) = numel(errorsort) + 1;
+counts = diff(ia);
+
+end
 
 
 
