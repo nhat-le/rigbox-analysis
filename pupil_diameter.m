@@ -1,9 +1,9 @@
-obj = VideoReader('C:\Users\Cherry Wang\Desktop\UROP-Nhat\Tracking_pupil\F17pupil_2.avi');
+obj = VideoReader('C:\Users\Cherry Wang\Dropbox (MIT)\Nhat\Pupil_diameter_testing\F16pupil.avi');
 NumberOfFrames = obj.NumFrames;
 startFrame = 3;
 refImage = read(obj,startFrame);
 refImage=rgb2gray(refImage);
-threshold = find_threshold(refImage, 'mode', 50);
+threshold = find_threshold(refImage, 'histAuto');
 refImage = logical(refImage<threshold);
 
 figure;
@@ -24,41 +24,16 @@ for frame_id = startFrame:NumberOfFrames
     if size(frame,3)==3
         frame=rgb2gray(frame);
     end
-    filas=size(frame,1);
-    columnas=size(frame,2);
-
- %% 
-%     subplot(231);
-%     imshow(frame);
-% 
-%     processed_frame = logical(abs(frame-48) <= 5);
-%     subplot(232);
-%     imshow(processed_frame);
-%     processed_frame=bwmorph(processed_frame,'close');
-%     subplot(233);
-%     imshow(processed_frame);
-%     processed_frame=bwmorph(processed_frame,'open');
-%     subplot(234);
-%     imshow(processed_frame);
-%     processed_frame=bwareaopen(processed_frame,2000);
-%     subplot(235);
-%     imshow(processed_frame);
-% 
-%     [row, col] = find(processed_frame==1);
-%     [center, radius] =  minboundcircle(row, col);
-%     subplot(236);
-%     imshow(frame);
-%     hold on;
-%     viscircles(fliplr(center),radius);
-%% 
     
-    %[threshold,~] = mode(frame(frame<50));
-    threshold = find_threshold(frame, 'mode', 50);
+    % Apply the drawn mask and modify by threshold
+    threshold = find_threshold(frame, 'histAuto');
     processed_frame = logical(frame<threshold);
     processed_frame(binaryImage == 0) =0;
     subplot(131)
     title("Mask & threshold applied")
     imshow(processed_frame);
+    
+    % Connecting pixels and getting rid of noise
     processed_frame = imfill(processed_frame,'holes');
     processed_frame=bwmorph(processed_frame,'bridge');
     processed_frame=bwareaopen(processed_frame,5);
@@ -69,6 +44,7 @@ for frame_id = startFrame:NumberOfFrames
     title("After bwmorph processing")
     imshow(processed_frame);
     
+    % Finding the minbound circle
     [row, col] = find(processed_frame==1);
     [center, radius] =  minboundcircle(row, col);
     %radius_lst = [radius_lst radius];
@@ -80,22 +56,19 @@ for frame_id = startFrame:NumberOfFrames
     hold off
     sgtitle(['frame ' num2str(frame_id)]);
     drawnow;
-    waitforbuttonpress;
+    %waitforbuttonpress;
 end
 
 function threshold = find_threshold(frame, option, max)
-    if strcmp(option,'mode')
+    if strcmp(option,'modeInRange')
         threshold = mode(frame(frame<max));
-    elseif strcmp(option,'hist')
+    elseif strcmp(option,'manual')
+        threshold = max;
+    elseif strcmp(option,'histAuto')
         [N,E] = histcounts(frame);
         localMax = islocalmax(N);
         th = E(localMax);
-        i = 1;
-        threshold = th(i);
-        while th(i+1) < max
-            i = i+1;
-            threshold = th(i);
-        end
+        threshold = th(1);
     end
    
 end
