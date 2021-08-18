@@ -6,7 +6,7 @@ function [allchoices, alltargets, skipping] = get_choice_sequence(id, root, fold
 % fodlers: folders(id) is the folder which contains the date of interest
 
 
-% disp(id)
+disp([num2str(id) ': ' folders(id).name])
 % For file concatenation
 files = dir(fullfile(root, ...
     folders(id).name, '*/*Block.mat'));
@@ -15,7 +15,16 @@ allchoices = [];
 alltargets = [];
 skipping = 0;
 for i = 1:numel(files)
-    load(fullfile(files(i).folder, files(i).name));
+    % Handle case of file corruption
+    try
+        load(fullfile(files(i).folder, files(i).name));
+    
+    catch ME
+        if (strcmp(ME.identifier,'MATLAB:load:notBinaryFile'))
+            fprintf('Error loading file %d of id %d: %s, skipping,...\n',...
+                i, id, files(i).name);
+        end     
+    end
     parts = strsplit(block.expDef, '\');
     filename = parts{end};
 
