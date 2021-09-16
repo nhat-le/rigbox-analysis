@@ -1,18 +1,25 @@
 % For visualizing the block structures from an animal through training
-filedir = '/Users/minhnhatle/Dropbox (MIT)/Nhat/animalHMMData/animalData_f01.mat';
+filedir = '/Users/minhnhatle/Dropbox (MIT)/Nhat/Rigbox/HMM/animalData_f12_crossval_091521.mat';
 load(filedir)
-name = animalData.name;
+name = animal;
+
+% 
+
 
 %%
 % Determine the states
-statesArr = {animalData.PSTATES.states3};
+statesArr = pstates_all(:,2); %{animalData.PSTATES.states3};
 maxArr = cell(numel(statesArr), 1);
-emisAll = {animalData.sessionInfo.EMIS_EST3};
+emisAll = E_all(:,2)';%{animalData.sessionInfo.EMIS_EST3};
 order = find_state_order(emisAll);
 probs = find_state_probs(emisAll);
 permutedAll = cell(numel(statesArr), 1);
 probsAll = cell(numel(statesArr), 1);
 
+if animal == 'f11'
+    maxArr(49) = [];
+    statesArr(49) = [];
+end
 
 for i = 1:numel(statesArr)
 	maxstates = get_currstate(statesArr{i});
@@ -56,17 +63,60 @@ end
 
 aggStates(isnan(aggStates)) = 4;
 
+% start of delay sessions
+firstdelay = find(maxdelays > 0, 1);
+
+
+%% Counting
+
+states1 = sum(aggStates == 1, 2);
+states2 = sum(aggStates == 2, 2);
+states3 = sum(aggStates == 3, 2);
+
+validStates = states1 + states2 + states3;
+
+frac1 = (states1 + states3) ./ validStates;
+frac2 = states2 ./ validStates;
+% frac3 = states3 ./ validStates;
+
+figure;
+plot(frac1);
+hold on
+plot(frac2)
+% plot(frac3)
+
+% Need to discard the last block...
+
+
+
+
+
+
 
 %% Plot
 figure;
-imagesc(aggStates);
+im = imagesc(aggStates);
+set(im, 'AlphaData', (aggStates < 4) * 0.8);
 title(name);
 xlabel('Trials')
 ylabel('Session')
 set(gca, 'FontSize', 16)
-colormap jet
+cmap = brewermap(9, 'RdYlBu');
+colormap(cmap)
+
+if numel(firstdelay) > 0
+    l = hline(firstdelay, 'w');
+    set(l, 'LineWidth', 2)
+end
+
+colorbar
+
+caxis([1, 3])
+
+
 
 %%
+% Visualize the probabilities of the states
 visualize_cell(probsAll, name)
 
 
@@ -116,8 +166,10 @@ xlabel('Trials')
 ylabel('Session')
 set(gca, 'FontSize', 16)
 % colormap(bluewhitered(256))
+cmap = brewermap(256, 'RdBu');
 caxis([-1,1])
-colormap(bluewhitered(256))
+colormap(cmap);
+% colormap(bluewhitered(256))
 
-
+% colormap jet
 end

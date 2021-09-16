@@ -1,7 +1,8 @@
-animals = {'e50'}; %, 'e54', 'e57', 'f01', 'f02', 'f03', 'f04'};
+animals = {'f01'}; %, 'e54', 'e57', 'f01', 'f02', 'f03', 'f04'};
 states = [2,3];
 num_states = numel(states);
 
+s = warning('error', 'stats:hmmtrain:NoConvergence');
 
 [~,computername] = system('hostname');
 switch computername(1:end-1)
@@ -11,6 +12,9 @@ switch computername(1:end-1)
     case 'LAPTOP-HGDQ2Q94'
         rigbox = 'C:\Users\Cherry Wang\Dropbox (MIT)\Nhat\Rigbox';
         savefolder = 'C:\Users\Cherry Wang\Desktop\UROP-Nhat\HMM';
+    case 'LMNMacbook.local'
+        rigbox = '/Users/minhnhatle/Dropbox (MIT)/Nhat/Rigbox';
+        savefolder = '/Users/minhnhatle/Dropbox (MIT)/Nhat/Rigbox/HMM';
 end
 
 for a = animals
@@ -178,7 +182,7 @@ for a = animals
     animalData.logllh = diff_logllh;
     animalData.normlogllh = diff_normlogllh;
     
-    fullsaveName = sprintf('animalData_%s.mat', animal);
+    fullsaveName = sprintf('animalData_%s_091321.mat', animal);
     save(fullfile(savefolder, fullsaveName), 'animalData')
     
 end

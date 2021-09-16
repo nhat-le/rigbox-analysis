@@ -1,4 +1,4 @@
-animals = {'e54', 'e57', 'f01', 'f02', 'f03', 'f04'};
+animals = {'e46', 'e56', 'e57'};
 states = [2,3];
 num_states = numel(states);
 
@@ -53,7 +53,16 @@ for a = animals
         skipping = 0;
         
         [allchoices, alltargets, skipping] = get_choice_sequence(id, root, folders);
-        load(fullfile(files(1).folder, files(1).name));
+        
+        try
+            load(fullfile(files(1).folder, files(1).name));
+        catch ME
+            if strcmp(ME.identifier, 'MATLAB:load:unableToReadMatFile')
+                fprintf('WARNING: CORRUPTED FILE, SKIPPING...\n');
+                continue;
+            end
+        end
+            
        
         
         N = numel(allchoices);
@@ -73,8 +82,9 @@ for a = animals
             idx = 2;
         end
         
-        trainset = allchoices(idx:2:end);
-        testset = allchoices(3-idx:2:end);
+        % For cross validation, see sections commented out..
+        trainset = allchoices; % allchoices(idx:2:end);
+        testset = allchoices; % allchoices(3-idx:2:end);
         
         
         
@@ -165,7 +175,7 @@ for a = animals
     %% Visualize with linked axes
 
     figure;
-    sessions_lst = 1:numel(folders);
+    sessions_lst = 1:size(states_lst, 2);
 
     states_fig = subplot(311);
     % plot(sessions_lst,states_lst(1,:),'red','linewidth',2 )
@@ -203,7 +213,7 @@ for a = animals
 %     animalData.normlogllh = diff_normlogllh;
 %     animalData.maxdelays = maxdelays;
     
-    fullsaveName = sprintf('animalData_%s_crossval_070921.mat', animal);
+    fullsaveName = sprintf('animalData_%s_crossval_091521.mat', animal);
     save(fullfile(savefolder, fullsaveName), 'animal', 'folders', 'diff_states',...
         'normlogllh_lst', 'logllh_lst', 'maxdelays', 'T_all', 'E_all', 'pstates_all',...
         'traindata_all', 'testdata_all', 'allchoices_all', 'alltargets_all', 'logllh_lst')
