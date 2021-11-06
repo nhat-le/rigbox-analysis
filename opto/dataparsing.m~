@@ -1,0 +1,10 @@
+T = readtable('sessionlog.xlsx');
+
+% define inclusion criteria
+animals = {'F26', 'F27'};
+areas = {'visual', 'motor'};
+powertype =  'higher'; % 'higher', 'lower', select power > or < than thresh
+powerthres = 10; %
+
+%filter
+ismember(T.Animal, animals) & ismember(T.Area, areas)
