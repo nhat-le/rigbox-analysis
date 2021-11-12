@@ -1,9 +1,9 @@
 T = readtable('sessionlog.xlsx');
 
 % define inclusion criteria
-animals = {'F26', 'F27', 'F29'};
-areas = {'frontal', 'motor', 'visual', 'rsc'};
-powertype =  '10-'; % '10+' means higher than 10
+animals = {'F27', 'F26', 'F29'};
+areas = {'rsc'};
+powertype =  '5+'; % '10+' means higher than 10
 
 %filter
 filt1 = ismember(T.Animal, animals) & ismember(T.Area, areas);
@@ -156,7 +156,7 @@ l2 = errorbar(errorlocsNL, countsNL / NnonoptoblocksL * 100, ...
 plot(errorlocsNL, countsNL / NnonoptoblocksL * 100, 'Color', colNOpto, 'LineWidth', 2)
 
 
-xlim([0, 15])
+xlim([0, 25])
 mymakeaxis('x_label', 'Trials', 'y_label', '% errors', 'xticks', [0, 5, 10], ...
     'xytitle', 'Left blocks')
 
@@ -175,7 +175,7 @@ plot(errorlocsNR, countsNR / NnonoptoblocksR * 100, 'Color', colNOpto, 'LineWidt
 
 
 legend([l3, l4], {'Opto', 'No-opto'});
-xlim([0, 15])
+xlim([0, 25])
 mymakeaxis('x_label', 'Trials', 'y_label', '% errors', 'xticks', [0, 5, 10],...
     'xytitle', 'Right blocks')
 legend([l3, l4], {'Opto', 'No-opto'});
@@ -196,7 +196,7 @@ l2 = errorbar(errorlocsN, countsN / Nnonoptoblocks * 100, ...
 plot(errorlocsN, countsN / Nnonoptoblocks * 100, 'Color', colNOpto, 'LineWidth', 2)
 
 
-xlim([0, 13])
+xlim([0, 25])
 mymakeaxis('x_label', 'Trials', 'y_label', '% errors', 'xticks', [0, 5, 10],...
     'xytitle', 'Combined')
 legend([l1, l2], {'Opto', 'No-opto'});
