@@ -15,7 +15,7 @@ f11_accrew_sessions = {'2021-07-26', '2021-07-27', '2021-07-28', '2021-07-29',..
 no_opto_flag_f11_accrew = [0, 0, 0, 0, 1];
 
 f12_acc_sessions = {'2021-07-06', '2021-07-08', '2021-07-09',...
-    '2021-07-14', '2020-07-20'};
+    '2021-07-14', '2020-07-20'}; % did not include 07.07 initially?
 no_opto_flag_f12_acc = [1, 0, 0, 0, 1, 0, 1];
 
 f12_accrew_sessions = {'2021-07-26', '2021-07-27', '2021-07-28', '2021-07-29',...
@@ -113,6 +113,7 @@ for id = 1:numel(folders)
                 opto = zeros(N);
             else
                 opto = block.events.optoblockValues;
+                opto = opto(2:end);
             end
 %             try
 %                 opto = block.events.optoblockValues;

@@ -1,35 +1,30 @@
-%% Example of how to get hardware info from json file
-folderPath = '/Users/minhnhatle/Dropbox (MIT)/Nhat/Rigbox/e53exampleSession';
-info = jsondecode(fileread(fullfile(folderPath, '2021-02-25_1_e53_hardwareInfo.json')));
-
-
-%%
-% for analysis of wheel movement aligned to reward times
-% directory = '/Users/minhnhatle/Dropbox (MIT)/Nhat/Rigbox/e54/2020-12-28/1';
-% directory = '/Users/minhnhatle/Dropbox (MIT)/Nhat/Rigbox/e35/2020-12-31/1';
-% directory = '/Users/minhnhatle/Dropbox (MIT)/Nhat/Rigbox/examplesubject-050621/4';
+%% Basic session information
 % good session:
 % directory = '/Users/minhnhatle/Dropbox (MIT)/Nhat/Rigbox/e43/2020-11-05/1';
 directory = '/Users/minhnhatle/Dropbox (MIT)/Nhat/Rigbox/f05/2021-05-03/1';
+% directory = '/Users/minhnhatle/Dropbox (MIT)/Nhat/Rigbox/f12/2021-05-31/1';
+
 
 bfile = dir(fullfile(directory, '*Block.mat'));
 load(fullfile(bfile(1).folder, bfile(1).name), 'block');
 
 feedbackTimes = block.events.feedbackTimes;
 responseTimes = block.events.responseTimes;
-stimOnTimes = block.events.stimulusOnTimes(1:numel(responses));
 
 feedback = block.events.feedbackValues;
 responses = block.events.responseValues;
-target = block.events.contrastLeftValues * (-2) + 1; %1 for leftmovement target,
+stimOnTimes = block.events.stimulusOnTimes(1:numel(responses));
+
+N = min([numel(stimOnTimes), numel(feedbackTimes)]);
+stimOnTimes = stimOnTimes(1:N);
+feedbackTimes = feedbackTimes(1:N);
+
 %-1 for rightmovement target (target == responses for correct trials)
+target = block.events.contrastLeftValues * (-2) + 1; %1 for leftmovement target,
 target = target(1:numel(feedbackTimes));
 
 pos = block.inputs.wheelMMValues;
 tRaw = block.inputs.wheelMMTimes;
-
-pos2 = block.inputs.wheelValues;
-t2 = block.inputs.wheelTimes;
 
 % Resample values
 Fs = 1000; %frequency to resample at
@@ -45,147 +40,61 @@ smoothSize = 0.03;
   wheel.findWheelMovesWithRefs(pos, t, Fs, stimOnTimes, 'makePlots', true, 'posThresh', 3,...
     'tThresh', 0.2, 'minDur', 0.02);
 
+leftOnsets = onsets(displacement > 0);
+rightOnsets = onsets(displacement < 0);
+
+
 
 %% Distribution of movement times aligned to stimOnset
-stimOnTimes = block.events.stimulusOnTimes(1:numel(responses));
-itis = [block.paramsValues.interTrialDelay];
-% feedbackTimes = block.events.feedbackTimes;
+[allmvOnsetAligned, mvTimesAlignedOnset] = getAlignedMvTimes(onsets, stimOnTimes, stimOnTimes);
 
-mvTimesAligned = {};
+[allmvOnsetLeftAligned, mvTimesLeftAlignedOnset] = getAlignedMvTimes(leftOnsets, stimOnTimes, stimOnTimes);
+[allmvOnsetRightAligned, mvTimesRightAlignedOnset] = getAlignedMvTimes(rightOnsets, stimOnTimes, stimOnTimes);
 
-for i = 1:numel(stimOnTimes) - 1
-    currTime = stimOnTimes(i);
-    nextTime = stimOnTimes(i+1);
-    mvtimes = onsets(onsets > currTime & onsets < nextTime);
-    if numel(mvtimes) > 0        
-        mvTimesAligned{i} = mvtimes(1) - currTime;
-    else
-        mvTimesAligned{i} = -1;
-    end
-    
-end
-
-idx1 = find(itis == 0.5);
-idx2 = find(itis == 0.75);
-idx3 = find(itis == 1);
-
-idx1(idx1 >= numel(stimOnTimes)-1) = [];
-idx2(idx2 >= numel(stimOnTimes)-1) = [];
-idx3(idx3 >= numel(stimOnTimes)-1) = [];
-
-
-mvArr1 = mvTimesAligned(idx1 + 1);
-mvArr2 = mvTimesAligned(idx2 + 1);
-mvArr3 = mvTimesAligned(idx3 + 1);
-
-mvArr1 = cell2mat(mvArr1');
-mvArr2 = cell2mat(mvArr2');
-mvArr3 = cell2mat(mvArr3');
-allmv = cell2mat(mvTimesAligned');
-
-edges = linspace(-1,10,100);
-histogram(mvArr1, edges)
-hold on
-histogram(mvArr2, edges)
-histogram(mvArr3, edges)
-
-
-
-% mvTimesArr = cell2mat(mvTimesAligned');
-% plot(rand(1, numel(mvTimesArr)), mvTimesArr, 'o');
-% histogram(mvTimesArr);
 
 %% Distribution of movement times aligned to prev reward
+[allmvPrevRew, mvTimesAlignedPrevRew] = getAlignedMvTimes(onsets, feedbackTimes, feedbackTimes);
+[allmvPrevRewLeftAligned, mvTimesLeftAlignedPrevRew] = getAlignedMvTimes(leftOnsets, feedbackTimes, feedbackTimes);
+[allmvPrevRewRightAligned, mvTimesRightAlignedPrevRew] = getAlignedMvTimes(rightOnsets, feedbackTimes, feedbackTimes);
 
-mvTimesAligned = {};
-mvTimesAligned{1} = -1;
-for i = 2:numel(stimOnTimes) - 1
-    currTime = stimOnTimes(i);
-    nextTime = stimOnTimes(i+1);
-    mvtimes = onsets(onsets > currTime & onsets < nextTime);
-    if numel(mvtimes) > 0        
-        mvTimesAligned{i} = mvtimes' - feedbackTimes(i-1);
-    else
-        mvTimesAligned{i} = -1;
-    end
-    
-end
-
-idx1 = find(itis == 0.75);
-idx2 = find(itis == 1);
-idx3 = find(itis == 1.25);
-
-idx1(idx1 >= numel(stimOnTimes)-1) = [];
-idx2(idx2 >= numel(stimOnTimes)-1) = [];
-idx3(idx3 >= numel(stimOnTimes)-1) = [];
-
-
-mvArr1 = mvTimesAligned(idx1 + 1);
-mvArr2 = mvTimesAligned(idx2 + 1);
-mvArr3 = mvTimesAligned(idx3 + 1);
-
-mvArr1 = cell2mat(mvArr1);
-mvArr2 = cell2mat(mvArr2);
-mvArr3 = cell2mat(mvArr3);
-allmv = cell2mat(mvTimesAligned);
-
-edges = linspace(-1,10,100);
-histogram(mvArr1, edges)
-hold on
-histogram(mvArr2, edges)
-histogram(mvArr3, edges)
 
 
 %% 
-dt = stimOnTimes(2:end) - feedbackTimes(1:end-1);
-dt1 = dt(idx1);
-dt2 = dt(idx2);
-dt3 = dt(idx3);
+dt = stimOnTimes(2:end-1) - feedbackTimes(1:end-2);
+
+[dtsorted,idxITI] = sort(dt);
+mvtimesITISort = mvTimesAlignedPrevRew(idxITI);
+
+mvtimesITISortLeft = mvTimesLeftAlignedPrevRew(idxITI);
+mvtimesITISortRight = mvTimesRightAlignedPrevRew(idxITI);
 
 
-% plot(sort(dt1));
-% hold on
-% plot(sort(dt2));
-% plot(sort(dt3));
 
-[~,idxITI] = sort(dt);
-mvtimesITISort = mvTimesAligned(idxITI);
+LineFormat1 = struct();
+LineFormat1.Color = [1 0 0];
+LineFormat1.LineWidth = 1;
 
 
-LineFormat = struct();
-LineFormat.Color = [0.3 0.3 0.3];
-LineFormat.LineWidth = 1;
+LineFormat2 = struct();
+LineFormat2.Color = [0 0 1];
+LineFormat2.LineWidth = 1;
 % LineFormat.LineStyle = ':';
-plotSpikeRaster(mvtimesITISort, 'PlotType', 'vertline', 'LineFormat', LineFormat,...
-    'VertSpikeHeight', 5)
+plotSpikeRaster(mvtimesITISortLeft, 'PlotType', 'vertline', 'LineFormat', LineFormat1,...
+    'VertSpikeHeight', 1)
 hold on
+plotSpikeRaster(mvtimesITISortRight, 'PlotType', 'vertline', 'LineFormat', LineFormat2,...
+    'VertSpikeHeight', 1)
 xlim([-3, 10])
 xlabel('Time (s)')
 ylabel('Trial #')
 set(gca, 'FontSize', 16)
 
-% where the block switch happens..
-% switchPos = find(diff(block.events.contrastLeftValues) ~= 0);
-% hline(switchPos)
-
-
-
-%%
-%Wait times
-histogram(diff(onsets), edges)
-
-
 
 %% Plot the wheel trace together with response times in the session
 figure;
-% ax = axes;
-% hold(ax, 'on');
-% plot(ax, wheelTimes, wheel)
-% plotBlockStructure(ax,t2, pos2, target, feedbackTimes, responses, 'wheel')
-% plot(ax,block.events.azimuthTimes, block.events.azimuthValues)
+
 plot(t, pos);
 hold on
-% vline(feedbackTimes, 'b-')
 vline(block.events.stimulusOnTimes, 'r-')
 vline(block.events.stimulusOnTimes + [block.paramsValues.interactiveDelay], 'r--')
 
@@ -413,4 +322,23 @@ y = [ymin ymin ymax ymax];
 plot(ax, [xmin xmin], [ymin ymax], color, 'LineWidth', 2);
 
 % patch(x,y,color, 'FaceAlpha', alpha, 'EdgeColor', 'none')
+end
+
+function [allMv, mvTimesAligned] = getAlignedMvTimes(onsets, tpoints, refTimes)
+mvTimesAligned = {};
+mvTimesAligned{1} = -1;
+for i = 1:numel(tpoints) - 1
+    currTime = tpoints(i);
+    nextTime = tpoints(i+1);
+    mvtimes = onsets(onsets > currTime & onsets < nextTime);
+    if numel(mvtimes) > 0        
+        mvTimesAligned{i} = mvtimes' - refTimes(i);
+    else
+        mvTimesAligned{i} = nan;
+    end
+    
+end
+
+allMv = cell2mat(mvTimesAligned);
+
 end

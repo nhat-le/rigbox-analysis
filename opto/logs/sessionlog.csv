@@ -1,0 +1,47 @@
+,Date,Animal,Area,Power,opto_voltage,ntrials,notes
+77,10-15-2021,F29,frontal,5.75,3.7,184,"manually switched sides at block 3, ended fairly early, random bursts of fast movements with frozenness especially in block 4/5"
+78,10-26-2021,F26,frontal,6.8,3.69,386,"did well, performed many blocks"
+79,10-26-2021,F27,frontal,6.8,3.7,429,Started out a little biased to the right (slow switching on the left); switching is a bit slow in general but good performance overall (stayed motivated)
+80,10-26-2021,F29,frontal,6.8,3.7,393,"GREAT performance. Likes to have some random switching in the middle of the block (usually during a left block). When rotating to left, likes to use one hand for rotating but uses both hands for a right turn"
+81,10-27-2021,F27,motor,6.1,3.66,224,"Laser spot as wide radius (reflection?), animal put in machine, taken out, put in again (<1hr before starting)"
+82,10-27-2021,F29,motor,6.1,3.66,263,Extremely good performance
+83,10-27-2021,F26,motor,6.1,3.66,442,"started out good behavior, then got noisier towards the end, ended first session (60% opto) and ran another session without any opto"
+84,10-28-2021,F29,visual,6.1,3.64,265,
+85,10-28-2021,F26,visual,6.1,3.64,420,"2nd session had an overall worse performance than first session (3 non-opto blocks, baseline)"
+86,10-28-2021,F27,visual,6.1,3.64,251,A little biased to the left when we started so did 4 base blocks with no opto. 2nd session also began with 4 non-opto blocks. Stopped being motivated pretty soon
+87,10-29-2021,F26,rsc,6.5,3.65,263,"Second session started out a little better than 3 base blocks, got demotivated quickly. Not a lot of opto blocks. Maybe needs a break from opto; Seemed agitated during 5th block, demotivated fast"
+88,10-29-2021,F27,rsc,6.5,3.65,227,"Overall great performance, demotivated very quickly"
+89,10-29-2021,F29,rsc,6.5,3.65,312,"Great performance!! Effects are subtle, if any"
+96,11-01-2021,F26,frontal,13,4.49,349,"Longer than usual set up time, blocks 6/7/8 different behavior, switched back to good behavior on non-opto"
+97,11-01-2021,F27,frontal,13,4.49,286,most of blocks are opto blocks. block 3 is interesting 
+98,11-01-2021,F29,frontal,13,4.49,248,"good switching behavior but stopped earlier than usual, opto effect was apparent"
+102,11-03-2021,F27,motor,13.1,4.53,198,demotivated very early on in session
+103,11-03-2021,F29,motor,13.1,4.53,277,animal may be moved during exp so 10 points that we choose may not be motor cortex
+104,11-03-2021,F26,motor,13.1,4.53,353,"great performance, almost 16 blocks, opto may have some effects"
+108,11-05-2021,F29,visual,12.5,4.59,300,Not the best performance
+109,11-05-2021,F26,visual,12.5,4.59,357,Not the best performance
+110,11-05-2021,F27,visual,12.5,4.59,256,First 5 blocks or so really great performance; but got demotivated very quickly
+114,11-07-2021,F26,rsc,13.1,4.25,338,"Okay performance, manually set 4 non-opto blocks as baseline"
+115,11-07-2021,F27,rsc,13.1,4.25,269,"Long non-opto block in session 2, demotivated quickly"
+116,11-07-2021,F29,rsc,13.1,4.25,277,"good performance in non-opto blocks, some errors during early opto blocks and more errors in late opto blocks"
+120,11-09-2021,F27,frontal,6.5,3.44,283,"Interesting first non-opto block, fairly slow switching throughout"
+121,11-09-2021,F29,frontal,6.5,3.44,294,good performance
+122,11-09-2021,F26,frontal,6.5,3.44,406,"Good performance, opto blocks skewed to right. Behavior initially biased to the right but then gradually biased to the left"
+129,11-12-2021,F29,motor,6.6,3.33,208,"Demotivated very early (maybe because so much water is rewarded at start since so accurate), first 8 blocks really good"
+130,11-12-2021,F26,motor,6.6,3.33,335,"Bias to one side, doesn't give up easily, performance just weakens"
+131,11-12-2021,F27,motor,6.6,3.33,297,Stress from beginning (we had to change the tube) may have contributed to poor performance
+135,11-14-2021,F26,visual,6.7,3.3,447,Really great performance
+136,11-14-2021,F27,visual,6.7,3.3,234 + 2 more baselines before restart,Great performance considering that it was on the wheel for a long time while we restarted the computer.
+137,11-14-2021,F29,visual,6.7,3.3,236,Great performance. Stopped very quickly
+141,11-16-2021,F27,visual,6.5,3.45,183,"Inflamation observed in the posterior part of the brain, very few errors"
+142,11-16-2021,F29,visual,6.5,3.45,227,good performance
+143,11-16-2021,F26,rsc,6.5,3.45,545,Really persistent. Seems to be an effect
+147,11-18-2021,F29,rsc,6.7,3.59,281,"good performance, stops fairly early"
+148,11-18-2021,F26,rsc,6.7,3.59,356,good performance
+149,11-18-2021,F27,rsc,6.7,3.59,397,good performance
+153,11-20-2021,F26,motor,6.8,3.45,410,Really good performance. But way more opto blocks than anticipated
+154,11-20-2021,F27,visual,6.8,3.45,270,Pretty good performance!
+155,11-20-2021,F29,rsc,6.8,3.45,341,Pretty good performance!
+162,11-23-2021,F29,visual,6.9,3.46,245,Stopped very early
+163,11-23-2021,F26,rsc,6.9,3.46,469,"A lot of blocks, pretty good performance"
+164,11-23-2021,F27,visual,6.9,3.46,314,"Persisted longer than usual, pretty good performance"

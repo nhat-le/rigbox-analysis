@@ -1,12 +1,36 @@
 % For visualizing the block structures from an animal through training
 animals = {'f01', 'f02', 'f11', 'f12', 'f16', 'f17', 'f20', 'f21',...
     'fh01', 'fh02', 'fh03', 'e35', 'e40', 'e50', 'e53', 'e54', 'e46', 'e56'};
+% missing e57..
 
 agg_all = struct;
 
+
+dateranges = {[7, 29],... %f01
+            [7, 29],... %f02
+            [6, 28],... %f11
+            [6, 29],... %f12
+            [7, 20],... %f16
+            [7, 20],... %f17
+            [7, 22],... %f20
+            [7, 22], ... %f21
+            [7, 16], ... %fh01
+            [3, 16], ... %fh02
+            [4, 27], ... %fh03
+            [15, 48],... %e35
+            [5, 29],... %e40
+            [13, 30], ...%e50
+            [5, 58], ...%e53
+            [4, 26], ... %e54
+            [7, 11], ...%e46
+            [8, 23]};  %e56
+
+
+
+
 for i = 1:numel(animals)
     name = animals{i};
-    filedir = sprintf('/Users/minhnhatle/Dropbox (MIT)/Nhat/Rigbox/HMM/animalData_%s_crossval_091521.mat',...
+    filedir = sprintf('/Users/minhnhatle/Dropbox (MIT)/Nhat/Rigbox/HMM/animalData_%s_crossval_091621.mat',...
         name);
     disp(filedir)
     load(filedir)
@@ -27,7 +51,7 @@ for i = 1:numel(animals)
     agg_all(i).statecounts = [states1 states2 states3];
     agg_all(i).statefrac = agg_all(i).statecounts ./ sum(agg_all(i).statecounts, 2);
     agg_all(i).permutedprobs = permutedprobsAll;
-    
+    agg_all(i).daterange = dateranges{i};
     
     % Parse blocksizes
     blockvals_all = {};
@@ -55,41 +79,110 @@ end
 sfrac_all = {};
 for i = 1:numel(agg_all)
     sfrac = agg_all(i).statefrac;
-    firstsess = find(~isnan(agg_all(i).statefrac), 1);
-    if numel(agg_all(i).firstdelay) > 0
-        lastsess = agg_all(i).firstdelay;
-    else
-        lastsess = size(sfrac, 1);
-    end
+%     firstsess = find(~isnan(agg_all(i).statefrac), 1);
+%     if numel(agg_all(i).firstdelay) > 0
+%         lastsess = agg_all(i).firstdelay;
+%     else
+%         lastsess = size(sfrac, 1);
+%     end
+    firstsess = agg_all(i).daterange(1);
+    lastsess = agg_all(i).daterange(2);
     sfrac_all{i} = sfrac(firstsess : lastsess, :);
 end
     
 
 %%
-maxlen = max(cellfun(@(x) size(x, 1), sfrac_all));
-sfrac_arr = nan(numel(sfrac_all), maxlen);
-for i = 1:numel(sfrac_all)
-    sfrac_arr(i,1:size(sfrac_all{i},1)) = sfrac_all{i}(:,2);
+sarr1 = pad_to_same_length(sfrac_all, 1);
+sarr2 = pad_to_same_length(sfrac_all, 2);
+sarr3 = pad_to_same_length(sfrac_all, 3);
+[Nanimals, Nsess] = size(sarr1);
+% 
+figure;
+errorbar(1:Nsess, nanmean(sarr1, 1), nanstd(sarr1, [], 1) / sqrt(Nanimals));
+hold on
+errorbar(1:Nsess, nanmean(sarr2, 1), nanstd(sarr2, [], 1) / sqrt(Nanimals));
+errorbar(1:Nsess, nanmean(sarr3, 1), nanstd(sarr3, [], 1) / sqrt(Nanimals));
+xlim([1,20])
+mymakeaxis('x_label', 'Sessions', 'y_label', 'Fraction');
+
+%%
+for i = 1:10
+    subplot(5,2,i)
+    plot(sarr2(i,:))
+    xlim([0, 25])
+end
+
+
+%% Parse state durations
+% visualize single-animal state durations
+idx = 2;
+block1lengths = agg_all(idx).block1lengths;
+block2lengths = agg_all(idx).block2lengths;
+block3lengths = agg_all(idx).block3lengths;
+
+block1medians = cellfun(@(x) median(x), block1lengths); 
+block2medians = cellfun(@(x) median(x), block2lengths); 
+block3medians = cellfun(@(x) median(x), block3lengths); 
+
+figure;
+plot(block1medians)
+hold on
+plot(block2medians, '--')
+plot(block3medians)
+
+
+%%
+figure;
+hold on
+for i = 1:numel(block1lengths)
+    if numel(block1lengths{i}) == 0
+        continue
+    end
+    plot(block1lengths{i},i, 'r.')
+    plot(block2lengths{i},i, 'bx')
+    plot(block3lengths{i},i, 'go')
+    
     
     
 end
 
 
-%% Parse state durations
-
-
-
-
-
 
 %% TODO: visualize state transitions
-E3_all = cell2mat(E_all(:,2));
+probsallcell1 = {};
+probsallcell2 = {};
+probsallcell3 = {};
+
+for idx = 1:numel(agg_all)
+    probsall = cell2mat(agg_all(idx).permutedprobs');
+    daterange = dateranges{idx};
+    probsall = probsall(:, daterange(1):daterange(2));
+%     figure;
+%     plot(probsall')
+%     title(agg_all(idx).animal);
+    probsallcell1{idx} = probsall(1,:)';
+    probsallcell2{idx} = probsall(2,:)';
+    probsallcell3{idx} = probsall(3,:)';
+end
+
+%%
+probsallarr1 = pad_to_same_length(probsallcell1', 1);
+probsallarr2 = pad_to_same_length(probsallcell2', 1);
+probsallarr3 = pad_to_same_length(probsallcell3', 1);
+
+figure;
+plot(nanmean(probsallarr1, 1))
+hold on
+plot(nanmean(probsallarr2, 1))
+plot(nanmean(probsallarr3, 1))
+
+xlim([1, 20])
+mymakeaxis('x_label', 'Session', 'y_label', 'Probability');
 
 
 
 %% TODO: analyze kinematics during each block type..
 
-% [a,b] = parse_blocksizes([1 1 1 1 2 2 2 3 3 3 3 3 4 4 2 2 2 2 2 2]);
 
 
 function [blockvals, blocksizes] = parse_blocksizes(arr)
@@ -155,9 +248,9 @@ end
 
 % Perform the permutation
 for i = 1:numel(maxArr)
-    if i == 55
-        disp('here')
-    end
+%     if i == 55
+%         disp('here')
+%     end
 %     disp(i)
     single_arr = maxArr{i};
 %     disp(single_arr)

@@ -1,4 +1,4 @@
-function allBlocks = parsedata(Tfilt, rigbox, varargin)
+function allBlocks = parsedata_helper(Tfilt, rigbox, varargin)
 %varargin could be used for no-opto flag
 
 allBlocks = struct;

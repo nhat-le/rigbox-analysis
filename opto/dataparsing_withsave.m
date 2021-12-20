@@ -14,8 +14,9 @@ method = 1;
 
 % define inclusion criteria
 animals = {'F27', 'F26', 'F29'};
-areas = {'visual'};
-powertype =  '5+'; % '10+' means higher than 10
+areas = {'rsc'};
+powertype =  '10-'; % '10+' means higher than 10
+filename = 'data/allanimals_rsc_10minus.mat';
 
 %filter
 filt1 = ismember(T.Animal, animals) & ismember(T.Area, areas);
@@ -56,7 +57,7 @@ for i = 1:numel(blockstarts) - 1
 end
 
 % get array of feedbacks and split to blocks
-arr = src.pad_to_same_length(feedbackcell);
+arr = pad_to_same_length(feedbackcell);
 
 % For display
 arr(isnan(arr)) = -0.5;
@@ -74,6 +75,8 @@ for i = 1:4
     colormap gray
     title(titles{i})
 end
+
+save(filename, 'arrOptoL', 'arrOptoR', 'arrNoOptoL', 'arrNoOptoR');
 
 %% Combine and average
 if method

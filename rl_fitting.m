@@ -1,4 +1,39 @@
 % For fitting behavior with an RL-model
+%% Load data
+datafile = '/Users/minhnhatle/Dropbox (MIT)/Nhat/animalHMMData/animalData_f04.mat';
+load(datafile);
+choices = {animalData.sessionInfo.choices};
+targets = {animalData.sessionInfo.targets};
+paramsAll = nan(numel(choices), 3);
+flagsAll = nan(numel(choices), 1);
+
+for id = 1:numel(choices)
+    fprintf('Fitting session %d of %d...\n', id, numel(choices));
+    if isempty(choices{id})
+        continue;
+    end
+    
+    session_choice = choices{id} * 2 - 3;
+    session_target = 1 - targets{id};
+    session_feedback = session_choice == session_target;
+    p0 = [0.2, 1, 0];
+    options = optimset('MaxFunEvals', 100000, 'MaxIter', 100000);
+    [params,~,exitflag] = fminsearch(@(p) neg_choice_likelihood(session_choice, session_feedback, p), ...
+        p0, options);
+
+    paramsAll(id,:) = params;
+    flagsAll(id) = exitflag;
+end
+
+
+%% Plot!
+figure;
+plot(paramsAll);
+legend({'alpha', 'beta', 'offset'})
+ylim([-10 10])
+
+
+
 %% Load behavior data
 datadir = '/Users/minhnhatle/Dropbox (MIT)/Nhat/Rigbox/f01/2021-03-26/1';
 files = dir(fullfile(datadir, '*Block.mat'));
@@ -16,6 +51,8 @@ feedback = feedback(1:N);
 alpha = params(1);
 beta = params(2);
 offset = params(3);
+response = session_choice;
+feedback = session_feedback;
 [v0, v1] = create_value_arr(alpha, response, feedback);
 % beta = 1;
 prob = sigmoid(v1 - v0, beta, offset);

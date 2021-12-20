@@ -1,5 +1,8 @@
-animals = {'e46', 'e56', 'e57'};
+% animals = {'f01', 'f02', 'f11', 'f12', 'f16', 'f17', 'f20', 'f21',...
+%    'fh01', 'fh02', 'fh03', 'e35', 'e40', 'e50', 'e53', 'e54', 'e46', 'e56'};
 states = [2,3];
+animals = {'f02', 'f11', 'f12', 'f16', 'f17', 'f20', 'f21',...
+   'fh01', 'fh02', 'fh03', 'e35', 'e40', 'e50', 'e53', 'e54', 'e46', 'e56'};
 num_states = numel(states);
 
 s = warning('error', 'stats:hmmtrain:NoConvergence');
@@ -18,7 +21,7 @@ switch computername(1:end-1)
 end
 
 
-%%
+%% Outer loop: iterate across animals
 for a = animals
     animal = a{1};
     root = fullfile(rigbox, animal);
@@ -37,15 +40,21 @@ for a = animals
     testdata_all = cell(numel(folders), 1);
     allchoices_all = cell(numel(folders), 1);
     alltargets_all = cell(numel(folders), 1);
+    expdates_all = cell(numel(folders), 1);
+    
+    
 
-
-    %% Going through each day of training for the animal specified
+    %% Inner loop: Going through each day of training for the animal specified
     for id = 1:numel(folders)
         disp(id)
 
         % Concatenate sessions from the same day into one session
         files = dir(fullfile(root, ...
             folders(id).name, '*/*Block.mat'));
+        parts = strsplit(files(1).name, '_');
+        expdate = parts{1};
+
+        
         allchoices = [];
         alltargets = [];
         curr_aic = zeros(num_states, 1);
@@ -63,7 +72,7 @@ for a = animals
             end
         end
             
-       
+        
         
         N = numel(allchoices);
 
@@ -152,6 +161,7 @@ for a = animals
         testdata_all{id} = testset;
         allchoices_all{id} = allchoices;
         alltargets_all{id} = alltargets;
+        expdates_all{id} = expdate;
         
         if skipping
             continue
@@ -213,10 +223,11 @@ for a = animals
 %     animalData.normlogllh = diff_normlogllh;
 %     animalData.maxdelays = maxdelays;
     
-    fullsaveName = sprintf('animalData_%s_crossval_091521.mat', animal);
+    fullsaveName = sprintf('animalData_%s_crossval_091621.mat', animal);
     save(fullfile(savefolder, fullsaveName), 'animal', 'folders', 'diff_states',...
         'normlogllh_lst', 'logllh_lst', 'maxdelays', 'T_all', 'E_all', 'pstates_all',...
-        'traindata_all', 'testdata_all', 'allchoices_all', 'alltargets_all', 'logllh_lst')
+        'traindata_all', 'testdata_all', 'allchoices_all', 'alltargets_all', 'logllh_lst',...
+        'expdates_all')
     
 end
 
