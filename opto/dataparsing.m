@@ -14,7 +14,7 @@ method = 1;
 
 % define inclusion criteria
 animals = {'F27', 'F26', 'F29'};
-areas = {'visual'};
+areas = {'motor'};
 powertype =  '5+'; % '10+' means higher than 10
 
 %filter
